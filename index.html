@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <title>Local</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script type="module" src="script.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <main id="container">
+    <ul id="outText">
+      <li class="loading" id="loading">
+        <i hidden></i>
+        <h4 hidden>Carregando...</h4>
+        <h5 hidden>Isso pode demorar um pouco. Tenha paciência.</h5>
+        <progress id="progress" value="0" max="108"></progress>
+      </li>
+    </ul>
+  </main>
+
+  <form id="form">
+    <input id="inText" placeholder="Digite a mensagem..." autocomplete="off" spellcheck="false" disabled />
+    <button id="btSend" disabled>Enviar</button>
+  </form>
+
+  <small id="outInfo">&nbsp;</small>
+
+  <template id="message-template">
+    <li class="message">
+      <span></span>
+      <p></p>
+    </li>
+  </template>
+</body>
+
+</html>
