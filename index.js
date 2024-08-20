@@ -2,11 +2,27 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const hostname = '127.0.0.1';
+const hostname = 'localhost';
 const port = 3000;
 const dbFilePath = 'db.txt';
 
+function handleCors(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    res.end();
+    return true;
+  }
+  return false;
+}
+
 const server = http.createServer((req, res) => {
+  if (handleCors(req, res)) {
+    return;
+  }
+
   let filePath = '.' + req.url;
   if (filePath === './') {
     filePath = './index.html';
@@ -91,5 +107,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
+  console.log(`http://${hostname}:${port}/`);
 });

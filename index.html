@@ -5,28 +5,228 @@
   <title>Local</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script type="module" src="script.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <script id="worker1" type="javascript/worker">
+    import { WebWorkerMLCEngineHandler } from "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm/+esm";
+    const handler = new WebWorkerMLCEngineHandler();
+    self.onmessage = (msg) => handler.onmessage(msg);
+  </script>
+  <script type="module">
+    import { CreateWebWorkerMLCEngine } from 'https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm/+esm';
+
+
+    let $ = (el) => document.querySelector(el),
+      template = $('#message-template'),
+      container = $('#container'),
+      progress = $('#progress'),
+      loading = $('#loading'),
+      outText = $('#outText'),
+      inText = $('#inText'),
+      btSend = $('#btSend'),
+      form = $('#form'),
+      messages = [],
+      end = false,
+      SELECTED_MODEL = 'Llama-3-8B-Instruct-q4f16_1-MLC',
+      blob = new Blob([$('#worker1').textContent], { type: "text/javascript" }),
+
+      addMessage = (text, sender) => {
+        let clonedTemplate = template.content.cloneNode(true),
+          message = clonedTemplate.querySelector('.message'),
+          span = message.querySelector('span'),
+          p = message.querySelector('p');
+        p.textContent = text;
+        span.textContent = sender == 'ai' ? 'ai' : 'user';
+        message.classList.add(sender);
+        outText.appendChild(message);
+        container.scrollTop = container.scrollHeight;
+        return p;
+      },
+
+      engine = await CreateWebWorkerMLCEngine(new Worker(window.URL.createObjectURL(blob), { type: 'module' }), SELECTED_MODEL, {
+        initProgressCallback: (info) => {
+          progress.value = info.text.split(/\[|\]|\//)[1] ? info.text.split(/\[|\]|\//)[1] : '0';
+          if (info.progress === 1 && !end) {
+            end = true;
+            loading?.parentNode?.removeChild(loading);
+            inText.removeAttribute('disabled');
+            btSend.removeAttribute('disabled');
+            addMessage('Olá, como posso ajudar?', 'ai');
+            inText.focus();
+          }
+        },
+      });
+
+    form.onsubmit = async (event) => {
+      event.preventDefault();
+      let text = inText.value.trim();
+      if (!text) return;
+      form.reset();
+      addMessage(text, 'user');
+      inText.setAttribute('disabled', '');
+      btSend.setAttribute('disabled', '');
+      messages.push({ role: 'user', content: text });
+      let chunks = await engine.chat.completions.create({ messages, stream: true }),
+        reply = '',
+        message = addMessage('', 'ai');
+      for await (const chunk of chunks) {
+        let choice = chunk.choices[0],
+          content = choice?.delta?.content ?? '';
+        reply += content;
+        message.textContent = reply;
+      }
+      inText.removeAttribute('disabled');
+      btSend.removeAttribute('disabled');
+      messages.push({ role: 'ai', content: reply });
+      container.scrollTop = container.scrollHeight;
+    };
+  </script>
+  <style>
+    html {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+        sans-serif;
+      background: #f0f0f0;
+    }
+
+    main {
+      width: 300px;
+      height: 270px;
+      background: #ffffff;
+      border: 1px solid #cccccc;
+      border-radius: 8px 8px 0px 0px;
+      padding: 8px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+
+    ul {
+      display: flex;
+      flex-direction: column;
+      list-style: none;
+      padding: 0;
+    }
+
+    .message {
+      display: flex;
+      flex-direction: column;
+      margin: 4px 0;
+      padding: 4px 8px;
+
+      span {
+        width: 36px;
+        height: 36px;
+        background: #eeeeee;
+        font-size: 12px;
+        font-weight: 500;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 999999px;
+        visibility: hidden;
+        position: absolute;
+      }
+
+      p {
+        border-radius: 4px;
+        padding: 4px 8px;
+        margin-top: 4px;
+      }
+
+      &.user {
+        align-self: flex-end;
+        align-items: flex-end;
+
+        span,
+        p {
+          background: #504D4C;
+          color: #ffffff;
+          border-radius: 8px 0px 8px 8px;
+        }
+      }
+
+      &.ai {
+        align-self: flex-start;
+
+        span,
+        p {
+          background: #F8F4F2;
+          border-radius: 0px 8px 8px 8px;
+        }
+      }
+    }
+
+    form {
+      display: flex;
+
+      input[type=text] {
+        border-radius: 0px 0px 0px 8px;
+        flex-grow: 1;
+        border: 0;
+        padding: 8px;
+        border: 1px solid #cccccc;
+        outline: 0px;
+      }
+
+      input[type=submit] {
+        border-radius: 999999px;
+        background: #c30011;
+        border: 0;
+        color: #ffffff;
+        border-radius: 0px 0px 8px 0px;
+        cursor: pointer;
+        padding: 8px;
+        transition: background 0.3s ease;
+
+        &[disabled] {
+          background: #cccccc;
+          opacity: 0.6;
+          pointer-events: none;
+        }
+
+        &:hover {
+          background: #9c000d;
+        }
+      }
+    }
+
+    .loading {
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      height: 100%;
+      align-items: center;
+      flex-direction: column;
+      margin-top: 50%;
+      transform: translate(0%, -50%);
+    }
+
+    progress {
+      accent-color: #c30011;
+    }
+  </style>
 </head>
 
 <body>
   <main id="container">
     <ul id="outText">
       <li class="loading" id="loading">
-        <i hidden></i>
-        <h4 hidden>Carregando...</h4>
-        <h5 hidden>Isso pode demorar um pouco. Tenha paciência.</h5>
         <progress id="progress" value="0" max="108"></progress>
       </li>
     </ul>
   </main>
 
   <form id="form">
-    <input id="inText" placeholder="Digite a mensagem..." autocomplete="off" spellcheck="false" disabled />
-    <button id="btSend" disabled>Enviar</button>
+    <input type="text" id="inText" placeholder="Digite a mensagem..." autocomplete="off" spellcheck="false" disabled>
+    <input type="submit" id="btSend" value="Enviar" disabled>
   </form>
-
-  <small id="outInfo">&nbsp;</small>
 
   <template id="message-template">
     <li class="message">
