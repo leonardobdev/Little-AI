@@ -5,6 +5,7 @@
   <title>Local</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <script id="worker1" type="javascript/worker">
     import { WebWorkerMLCEngineHandler } from "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm/+esm";
     const handler = new WebWorkerMLCEngineHandler();
@@ -12,7 +13,6 @@
   </script>
   <script type="module">
     import { CreateWebWorkerMLCEngine } from 'https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm/+esm';
-
 
     let $ = (el) => document.querySelector(el),
       template = $('#message-template'),
@@ -25,7 +25,7 @@
       form = $('#form'),
       messages = [],
       end = false,
-      SELECTED_MODEL = 'Llama-3-8B-Instruct-q4f16_1-MLC',
+      LLM = 'Qwen2-0.5B-Instruct-q0f32-MLC',
       blob = new Blob([$('#worker1').textContent], { type: "text/javascript" }),
 
       addMessage = (text, sender) => {
@@ -34,24 +34,23 @@
           span = message.querySelector('span'),
           p = message.querySelector('p');
         p.textContent = text;
-        span.textContent = sender == 'ai' ? 'ai' : 'user';
+        span.textContent = sender === 'ai' ? 'ai' : 'user';
         message.classList.add(sender);
         outText.appendChild(message);
         container.scrollTop = container.scrollHeight;
         return p;
       },
 
-      engine = await CreateWebWorkerMLCEngine(new Worker(window.URL.createObjectURL(blob), { type: 'module' }), SELECTED_MODEL, {
+      engine = await CreateWebWorkerMLCEngine(new Worker(window.URL.createObjectURL(blob), { type: 'module' }), LLM, {
         initProgressCallback: (info) => {
           progress.value = info.text.split(/\[|\]|\//)[1] ? info.text.split(/\[|\]|\//)[1] : '0';
-          if (info.progress === 1 && !end) {
-            end = true;
-            loading?.parentNode?.removeChild(loading);
-            inText.removeAttribute('disabled');
-            btSend.removeAttribute('disabled');
-            addMessage('Olá, como posso ajudar?', 'ai');
-            inText.focus();
-          }
+          if (!(info.progress === 1 && !end)) return;
+          end = true;
+          loading?.parentNode?.removeChild(loading);
+          inText.disabled = false;
+          btSend.disabled = false;
+          addMessage('Olá, como posso ajudar?', 'ai');
+          inText.focus();
         },
       });
 
@@ -61,8 +60,8 @@
       if (!text) return;
       form.reset();
       addMessage(text, 'user');
-      inText.setAttribute('disabled', '');
-      btSend.setAttribute('disabled', '');
+      inText.disabled = true;
+      btSend.disabled = true;
       messages.push({ role: 'user', content: text });
       let chunks = await engine.chat.completions.create({ messages, stream: true }),
         reply = '',
@@ -73,8 +72,8 @@
         reply += content;
         message.textContent = reply;
       }
-      inText.removeAttribute('disabled');
-      btSend.removeAttribute('disabled');
+      inText.disabled = false;
+      btSend.disabled = false;
       messages.push({ role: 'ai', content: reply });
       container.scrollTop = container.scrollHeight;
     };
