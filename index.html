@@ -49,8 +49,8 @@
           loading?.parentNode?.removeChild(loading);
           inText.disabled = false;
           btSend.disabled = false;
-          addMessage('Olá, como posso ajudar?', 'ai');
           inText.focus();
+          addMessage('Olá, como posso ajudar?', 'ai');
         },
       });
 
@@ -74,7 +74,8 @@
       }
       inText.disabled = false;
       btSend.disabled = false;
-      messages.push({ role: 'ai', content: reply });
+      inText.focus();
+      messages.push({ role: 'assistant', content: reply });
       container.scrollTop = container.scrollHeight;
     };
   </script>
