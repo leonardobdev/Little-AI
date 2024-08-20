@@ -1,2 +1,2 @@
 # Local
-https://leonardobdev.github.io/little-ai
+https://leonardobdev.github.io/little-ai/
