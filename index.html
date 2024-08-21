@@ -6,7 +6,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <script id="worker1" type="javascript/worker">
+  <script id="worker" type="javascript/worker">
     import { WebWorkerMLCEngineHandler } from "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm/+esm";
     const handler = new WebWorkerMLCEngineHandler();
     self.onmessage = (msg) => handler.onmessage(msg);
@@ -26,7 +26,7 @@
       messages = [],
       end = false,
       LLM = 'Qwen2-0.5B-Instruct-q0f32-MLC',
-      blob = new Blob([$('#worker1').textContent], { type: "text/javascript" }),
+      blob = new Blob([$('#worker').textContent], { type: "text/javascript" }),
 
       addMessage = (text, sender) => {
         let clonedTemplate = template.content.cloneNode(true),
@@ -88,6 +88,7 @@
       justify-content: center;
       align-items: center;
       margin: 0;
+      overflow-y: hidden;
     }
 
     body {
