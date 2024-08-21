@@ -50,7 +50,6 @@
           inText.disabled = false;
           btSend.disabled = false;
           addMessage('Olá, como posso ajudar?', 'ai');
-          container.scrollTop = container.scrollHeight;
           inText.focus();
         },
       });
@@ -72,6 +71,7 @@
           content = choice?.delta?.content ?? '';
         reply += content;
         message.textContent = reply;
+        container.scrollTop = container.scrollHeight;
       }
       inText.disabled = false;
       btSend.disabled = false;
