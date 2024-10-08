@@ -1,0 +1,132 @@
+html {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    overflow-y: hidden;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+        sans-serif;
+    background: #f0f0f0;
+}
+
+main {
+    width: 300px;
+    height: 270px;
+    background: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 8px 8px 0px 0px;
+    padding: 8px;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+
+ul {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    padding: 0;
+}
+
+.message {
+    display: flex;
+    flex-direction: column;
+    margin: 4px 0;
+    padding: 4px 8px;
+
+    span {
+        width: 36px;
+        height: 36px;
+        background: #eeeeee;
+        font-size: 12px;
+        font-weight: 500;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 999999px;
+        visibility: hidden;
+        position: absolute;
+    }
+
+    p {
+        border-radius: 4px;
+        padding: 4px 8px;
+        margin-top: 4px;
+    }
+
+    &.user {
+        align-self: flex-end;
+        align-items: flex-end;
+
+        span,
+        p {
+            background: #504D4C;
+            color: #ffffff;
+            border-radius: 8px 0px 8px 8px;
+        }
+    }
+
+    &.ai {
+        align-self: flex-start;
+
+        span,
+        p {
+            background: #F8F4F2;
+            border-radius: 0px 8px 8px 8px;
+        }
+    }
+}
+
+form {
+    display: flex;
+
+    input[type=text] {
+        border-radius: 0px 0px 0px 8px;
+        flex-grow: 1;
+        border: 0;
+        padding: 8px;
+        border: 1px solid #cccccc;
+        outline: 0px;
+    }
+
+    input[type=submit] {
+        border-radius: 999999px;
+        background: black;
+        border: 0;
+        color: #ffffff;
+        border-radius: 0px 0px 8px 0px;
+        cursor: pointer;
+        padding: 8px;
+        transition: background 0.3s ease;
+
+        &[disabled] {
+            background: #cccccc;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        &:hover {
+            background: darkgray;
+        }
+    }
+}
+
+.loading {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    align-items: center;
+    flex-direction: column;
+    margin-top: 50%;
+    transform: translate(0%, -50%);
+}
+
+progress {
+    accent-color: black;
+}
